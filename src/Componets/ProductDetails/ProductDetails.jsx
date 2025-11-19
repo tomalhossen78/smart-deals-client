@@ -6,10 +6,24 @@ import Swal from "sweetalert2";
 const ProductDetails = () => {
   const product = useLoaderData();
   const { _id: productId } = product;
+  // console.log("product is ", product);
   const [bids, setBids] = useState([]);
   const bidModalRef = useRef(null);
   const { user } = use(AuthContext);
-  console.log(product);
+
+  useEffect(() => {
+    fetch(`http://localhost:3000/products/bids/${productId}`, {
+      headers: {
+        authorization: `Bearer ${user?.accessToken} `,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("bids for this products", data);
+        setBids(data);
+      });
+  }, [productId, user]);
+  // console.log(product);
   const handlebidModalsOpen = () => {
     bidModalRef.current.showModal();
   };
@@ -21,12 +35,12 @@ const ProductDetails = () => {
     const bid = form.bid.value;
     // console.log(_id, name, email, bid);
     const newBid = {
-      product: productId,
       buyer_name: name,
       buyer_image: user?.photoURL,
       buyer_email: email,
       bid_price: bid,
       status: "pending",
+      product: productId,
     };
 
     fetch("http://localhost:3000/bids", {
@@ -50,18 +64,12 @@ const ProductDetails = () => {
           //add the new bid to the state
           newBid._id = data.insertedId;
           const newBids = [...bids, newBid];
+          newBids.sort((a, b) => b.bid_price - a.bid_price);
           setBids(newBids);
         }
       });
   };
-  useEffect(() => {
-    fetch(`http://localhost:3000/products/bids/${productId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("bids for this products", data);
-        setBids(data);
-      });
-  }, [productId]);
+
   return (
     <div>
       {/*product info */}
@@ -135,7 +143,7 @@ const ProductDetails = () => {
               <tbody>
                 {/* row 1 */}
                 {bids.map((bid, index) => (
-                  <tr>
+                  <tr key={index}>
                     <th>{index + 1}</th>
                     <td>
                       <div className="flex items-center gap-3">

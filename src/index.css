@@ -6,7 +6,7 @@
   name: "light";
   default: true;
   --color-primary: #632EE3;
-  --color-secondary: teal;
+  --color-secondary: red;
 }
 .btn-primary {
   background-image: linear-gradient(to right, #632EE3, #9F62F2) !important;
